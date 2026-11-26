@@ -18,7 +18,31 @@
     <div class="arcade-stats" aria-live="polite">
       <div class="arcade-stat">分數<strong id="score">0</strong></div>
       <div class="arcade-stat">生命<strong id="lives">3</strong></div>
-      <div class="arcade-stat">最高分<strong id="best-score">0</strong></div>
+      <div class="arcade-stat">時間<strong id="timer">--</strong></div>
+    </div>
+    <div class="arcade-settings">
+      <label>模式
+        <select id="game-mode">
+          <option value="classic">經典生存</option>
+          <option value="time">60 秒限時</option>
+          <option value="hardcore">一命挑戰</option>
+        </select>
+      </label>
+      <label>難度
+        <select id="difficulty">
+          <option value="easy">輕鬆</option>
+          <option value="normal" selected>標準</option>
+          <option value="hard">困難</option>
+        </select>
+      </label>
+      <label>戰機皮膚
+        <select id="skin-select">
+          <option value="cosmic">星際藍</option>
+          <option value="ocean">深海青</option>
+          <option value="sunset">夕陽橘</option>
+        </select>
+      </label>
+      <label class="sound-setting"><input id="sound-toggle" type="checkbox"> 音效</label>
     </div>
     <canvas id="game" class="arcade-canvas" width="480" height="600" aria-label="星際戰機遊戲畫面"></canvas>
     <p class="game-message" id="message" aria-live="polite">按「開始遊戲」出擊！</p>
@@ -26,8 +50,13 @@
       <button class="arcade-button" id="start-button" type="button">開始遊戲</button>
     </div>
     <p class="arcade-help">← → 或 A / D 移動 · 按住空白鍵連續射擊 · P 暫停</p>
+    <section class="arcade-leaderboard" aria-labelledby="leaderboard-title">
+      <h2 id="leaderboard-title">本機排行榜 <span id="leaderboard-mode"></span></h2>
+      <ol id="leaderboard-list"></ol>
+    </section>
   </main>
 
+  <script src="arcade-features.js"></script>
   <script src="shooter.js"></script>
 </body>
 </html>

@@ -3,6 +3,10 @@
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   color: #cdd6f4;
   background: #181825;
+  --arcade-accent: #89b4fa;
+  --arcade-player: #89b4fa;
+  --arcade-enemy: #f38ba8;
+  --arcade-food: #f9e2af;
 }
 
 * {
@@ -162,7 +166,7 @@ a {
 
 .arcade-header h1 {
   margin: 8px 0;
-  color: #89b4fa;
+  color: var(--arcade-accent);
   font-size: clamp(26px, 6vw, 36px);
 }
 
@@ -180,7 +184,7 @@ a {
 
 .arcade-back:hover,
 .arcade-back:focus-visible {
-  color: #89b4fa;
+  color: var(--arcade-accent);
 }
 
 .arcade-panel {
@@ -235,7 +239,7 @@ a {
   padding: 10px 18px;
   border: 0;
   border-radius: 8px;
-  background: #89b4fa;
+  background: var(--arcade-accent);
   color: #11111b;
   cursor: pointer;
   font: inherit;
@@ -244,7 +248,7 @@ a {
 
 .arcade-button:hover,
 .arcade-button:focus-visible {
-  background: #b4befe;
+  filter: brightness(1.12);
   outline: 2px solid #cdd6f4;
   outline-offset: 2px;
 }
@@ -273,6 +277,104 @@ a {
 .game-home-link:hover,
 .game-home-link:focus-visible {
   color: #89b4fa;
+}
+
+.arcade-settings {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: end;
+  gap: 12px;
+  margin: 0 0 16px;
+}
+
+.arcade-settings label {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  color: #a6adc8;
+  font-size: 12px;
+}
+
+.arcade-settings select {
+  min-width: 112px;
+  padding: 8px 10px;
+  border: 1px solid #45475a;
+  border-radius: 7px;
+  background: #11111b;
+  color: #cdd6f4;
+  font: inherit;
+}
+
+.arcade-settings .sound-setting {
+  flex-direction: row;
+  align-items: center;
+  min-height: 34px;
+  font-size: 14px;
+}
+
+.arcade-settings input {
+  accent-color: var(--arcade-accent);
+}
+
+.arcade-leaderboard {
+  margin-top: 20px;
+  padding-top: 14px;
+  border-top: 1px solid #45475a;
+}
+
+.arcade-leaderboard h2,
+.scoreboard h2 {
+  margin: 0 0 10px;
+  color: var(--arcade-accent);
+  font-size: 16px;
+}
+
+.arcade-leaderboard h2 span,
+.scoreboard h2 span {
+  color: #a6adc8;
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.arcade-leaderboard ol,
+.scoreboard ol {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.arcade-leaderboard li,
+.scoreboard li {
+  display: grid;
+  grid-template-columns: 30px 1fr auto;
+  gap: 8px;
+  align-items: center;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: #11111b;
+  color: #a6adc8;
+  font-size: 13px;
+}
+
+.arcade-leaderboard li strong,
+.scoreboard li strong {
+  color: #f9e2af;
+}
+
+.arcade-leaderboard li time,
+.scoreboard li time {
+  color: #7f849c;
+  font-size: 11px;
+}
+
+.arcade-leaderboard .leaderboard-empty,
+.scoreboard .leaderboard-empty {
+  display: block;
+  color: #7f849c;
+  text-align: center;
 }
 
 @media (max-width: 520px) {

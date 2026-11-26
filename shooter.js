@@ -2,13 +2,19 @@ const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
 const scoreElement = document.getElementById('score');
 const livesElement = document.getElementById('lives');
-const bestScoreElement = document.getElementById('best-score');
+const timerElement = document.getElementById('timer');
 const messageElement = document.getElementById('message');
 const startButton = document.getElementById('start-button');
+const modeSelect = document.getElementById('game-mode');
+const difficultySelect = document.getElementById('difficulty');
+const leaderboardList = document.getElementById('leaderboard-list');
+const leaderboardMode = document.getElementById('leaderboard-mode');
 
 const WIDTH = canvas.width;
 const HEIGHT = canvas.height;
 const keys = new Set();
+const modeNames = { classic: '經典生存', time: '60 秒限時', hardcore: '一命挑戰' };
+const difficultyMultipliers = { easy: 0.8, normal: 1, hard: 1.35 };
 const stars = Array.from({ length: 70 }, () => ({
   x: Math.random() * WIDTH,
   y: Math.random() * HEIGHT,
@@ -17,31 +23,44 @@ const stars = Array.from({ length: 70 }, () => ({
 }));
 
 let player;
-let bullets;
-let enemies;
+let bullets = [];
+let enemies = [];
 let score = 0;
 let lives = 3;
+let gameMode = 'classic';
+let difficulty = 'normal';
+let elapsed = 0;
 let running = false;
 let paused = false;
 let spawnTimer = 0;
 let shotTimer = 0;
 let previousTime = 0;
 let animationFrame = 0;
-let bestScore = Number(localStorage.getItem('shooter-best-score')) || 0;
+let shipSkin = ArcadeFeatures.getSkin();
 
-bestScoreElement.textContent = bestScore;
+function refreshLeaderboard() {
+  const selectedMode = modeSelect.value;
+  leaderboardMode.textContent = `・${modeNames[selectedMode]}`;
+  ArcadeFeatures.renderLeaderboard(leaderboardList, ArcadeFeatures.getScores('shooter', selectedMode));
+}
 
 function resetGame() {
+  gameMode = modeSelect.value;
+  difficulty = difficultySelect.value;
   player = { x: WIDTH / 2, y: HEIGHT - 52, width: 34, height: 36, speed: 300 };
   bullets = [];
   enemies = [];
   score = 0;
-  lives = 3;
+  lives = gameMode === 'hardcore' ? 1 : 3;
+  elapsed = 0;
   spawnTimer = 0;
   shotTimer = 0;
   paused = false;
+  modeSelect.disabled = true;
+  difficultySelect.disabled = true;
   scoreElement.textContent = score;
   livesElement.textContent = lives;
+  timerElement.textContent = gameMode === 'time' ? '60s' : '∞';
   messageElement.textContent = '';
   startButton.textContent = '重新開始';
   running = true;
@@ -56,7 +75,8 @@ function spawnEnemy() {
     x: size + Math.random() * (WIDTH - size * 2),
     y: -size,
     size,
-    speed: 90 + Math.random() * 45 + Math.min(score, 500) * 0.12,
+    speed: (90 + Math.random() * 45 + Math.min(score, 500) * 0.12) *
+      difficultyMultipliers[difficulty] * (gameMode === 'hardcore' ? 1.2 : 1),
     drift: (Math.random() - 0.5) * 70
   });
 }
@@ -70,6 +90,16 @@ function overlaps(rect, circle) {
 }
 
 function update(delta) {
+  elapsed += delta;
+  if (gameMode === 'time') {
+    const remaining = Math.max(0, 60 - Math.floor(elapsed));
+    timerElement.textContent = `${remaining}s`;
+    if (remaining === 0) {
+      endGame('時間到！');
+      return;
+    }
+  }
+
   const direction = Number(keys.has('ArrowRight') || keys.has('KeyD')) -
     Number(keys.has('ArrowLeft') || keys.has('KeyA'));
   player.x = Math.max(player.width / 2, Math.min(WIDTH - player.width / 2, player.x + direction * player.speed * delta));
@@ -78,6 +108,7 @@ function update(delta) {
   if (keys.has('Space') && shotTimer >= 0.18) {
     bullets.push({ x: player.x, y: player.y - 20, speed: 440 });
     shotTimer = 0;
+    ArcadeFeatures.playSound('shoot');
   }
 
   for (const star of stars) {
@@ -89,7 +120,7 @@ function update(delta) {
   }
 
   spawnTimer += delta;
-  const spawnInterval = Math.max(0.32, 0.85 - score / 1400);
+  const spawnInterval = Math.max(0.32, (0.85 - score / 1400) / difficultyMultipliers[difficulty]);
   if (spawnTimer >= spawnInterval) {
     spawnEnemy();
     spawnTimer = 0;
@@ -106,6 +137,7 @@ function update(delta) {
 
   for (const enemy of enemies) {
     for (const bullet of bullets) {
+      if (bullet.destroyed) continue;
       const dx = enemy.x - bullet.x;
       const dy = enemy.y - bullet.y;
       if (dx * dx + dy * dy < enemy.size * enemy.size) {
@@ -113,6 +145,7 @@ function update(delta) {
         bullet.destroyed = true;
         score += 10;
         scoreElement.textContent = score;
+        ArcadeFeatures.playSound('hit');
         break;
       }
     }
@@ -126,6 +159,7 @@ function update(delta) {
       enemy.destroyed = true;
       lives -= 1;
       livesElement.textContent = lives;
+      ArcadeFeatures.playSound('hit');
       if (lives <= 0) {
         endGame();
         return;
@@ -136,6 +170,7 @@ function update(delta) {
       enemy.destroyed = true;
       lives -= 1;
       livesElement.textContent = lives;
+      ArcadeFeatures.playSound('hit');
       if (lives <= 0) {
         endGame();
         return;
@@ -159,14 +194,14 @@ function draw() {
   ctx.globalAlpha = 1;
 
   for (const bullet of bullets) {
-    ctx.fillStyle = '#89dceb';
+    ctx.fillStyle = shipSkin.accent;
     ctx.fillRect(bullet.x - 2, bullet.y - 9, 4, 14);
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(bullet.x - 1, bullet.y - 8, 2, 8);
   }
 
   for (const enemy of enemies) {
-    ctx.fillStyle = '#f38ba8';
+    ctx.fillStyle = shipSkin.enemy;
     ctx.beginPath();
     ctx.moveTo(enemy.x, enemy.y + enemy.size);
     ctx.lineTo(enemy.x - enemy.size, enemy.y - enemy.size * 0.6);
@@ -180,7 +215,7 @@ function draw() {
   }
 
   if (player) {
-    ctx.fillStyle = '#89b4fa';
+    ctx.fillStyle = shipSkin.player;
     ctx.beginPath();
     ctx.moveTo(player.x, player.y - player.height / 2);
     ctx.lineTo(player.x - player.width / 2, player.y + player.height / 2);
@@ -204,16 +239,18 @@ function gameLoop(time) {
   if (running) animationFrame = requestAnimationFrame(gameLoop);
 }
 
-function endGame() {
+function endGame(reason = '任務結束！') {
   running = false;
   paused = false;
   cancelAnimationFrame(animationFrame);
-  if (score > bestScore) {
-    bestScore = score;
-    bestScoreElement.textContent = bestScore;
-    localStorage.setItem('shooter-best-score', String(bestScore));
-  }
-  messageElement.textContent = `任務結束！本次得分：${score}`;
+  modeSelect.disabled = false;
+  difficultySelect.disabled = false;
+  ArcadeFeatures.renderLeaderboard(
+    leaderboardList,
+    ArcadeFeatures.recordScore('shooter', gameMode, score)
+  );
+  ArcadeFeatures.playSound('gameover');
+  messageElement.textContent = `${reason} 本次得分：${score}`;
   startButton.textContent = '再玩一次';
   draw();
 }
@@ -233,6 +270,13 @@ function togglePause() {
 }
 
 startButton.addEventListener('click', resetGame);
+modeSelect.addEventListener('change', refreshLeaderboard);
+ArcadeFeatures.bindSkin(document.getElementById('skin-select'), skin => {
+  shipSkin = skin;
+  draw();
+});
+ArcadeFeatures.bindSoundToggle(document.getElementById('sound-toggle'));
+refreshLeaderboard();
 document.addEventListener('keydown', event => {
   if (['ArrowLeft', 'ArrowRight', 'Space'].includes(event.code)) event.preventDefault();
   keys.add(event.code);

@@ -47,13 +47,13 @@
       border-color: #89b4fa;
     }
     button#start-btn {
-      background-color: #89b4fa;
+      background-color: var(--arcade-accent, #89b4fa);
       color: #11111b;
       border: none;
       transition: 0.2s;
     }
     button#start-btn:hover {
-      background-color: #b4befe;
+      filter: brightness(1.12);
     }
     .timer-badge {
       background-color: #11111b;
@@ -179,4 +179,77 @@
 .game-home-link:hover,
 .game-home-link:focus-visible {
   color: #89b4fa;
+}
+
+.scoreboard {
+  width: min(100%, 560px);
+  margin-top: 20px;
+  padding: 14px 18px;
+  border: 1px solid #313244;
+  border-radius: 10px;
+  background: #1e1e2e;
+}
+
+.scoreboard h2 {
+  margin: 0 0 10px;
+  color: var(--arcade-accent, #89b4fa);
+  font-size: 16px;
+}
+
+.scoreboard h2 span {
+  color: #a6adc8;
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.scoreboard ol {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.scoreboard li {
+  display: grid;
+  grid-template-columns: 30px 1fr auto;
+  gap: 8px;
+  align-items: center;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: #11111b;
+  color: #a6adc8;
+  font-size: 13px;
+}
+
+.scoreboard li strong {
+  color: #f9e2af;
+}
+
+.scoreboard li time {
+  color: #7f849c;
+  font-size: 11px;
+}
+
+.scoreboard .leaderboard-empty {
+  display: block;
+  color: #7f849c;
+  text-align: center;
+}
+
+.sound-setting {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+}
+
+.sound-setting input {
+  accent-color: var(--arcade-accent, #89b4fa);
+}
+
+@media (max-width: 520px) {
+  .scoreboard {
+    padding: 12px;
+  }
 }

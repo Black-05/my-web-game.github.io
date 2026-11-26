@@ -232,6 +232,11 @@
         } else {
           this.merge();
           this.sweep();
+          if (!this.isAI && currentMode === 'sprint' && this.lines >= 40) {
+            finishSprintMatch();
+            this.dropCounter = 0;
+            return;
+          }
           this.spawnPiece();
         }
         this.dropCounter = 0;
@@ -245,6 +250,11 @@
         }
         this.merge();
         this.sweep();
+        if (!this.isAI && currentMode === 'sprint' && this.lines >= 40) {
+          finishSprintMatch();
+          this.dropCounter = 0;
+          return;
+        }
         this.updateUI();
         this.spawnPiece();
         this.dropCounter = 0;
@@ -275,6 +285,7 @@
           const points = [0, 100, 300, 500, 800];
           this.score += points[cleared] * this.level;
           this.lines += cleared;
+          if (!this.isAI) ArcadeFeatures.playSound('clear');
 
           // 每消除 4 行升一級，加快下落速度
           const newLevel = Math.floor(this.lines / 4) + 1;
@@ -525,6 +536,33 @@
     let animationId = null;
     let blitzTimeLeft = 120;
     let blitzAccumulator = 0;
+    let sprintAccumulator = 0;
+    let matchRecorded = false;
+
+    const modeNames = {
+      battle: '電腦對決',
+      solo: '單人經典',
+      blitz: '限時競速',
+      sprint: '40 行衝刺'
+    };
+
+    function refreshLeaderboard() {
+      const selectedMode = document.getElementById('game-mode').value;
+      document.getElementById('leaderboard-mode').textContent = `・${modeNames[selectedMode]}`;
+      ArcadeFeatures.renderLeaderboard(
+        document.getElementById('leaderboard-list'),
+        ArcadeFeatures.getScores('tetris', selectedMode)
+      );
+    }
+
+    function recordMatchScore(score) {
+      if (matchRecorded) return;
+      matchRecorded = true;
+      ArcadeFeatures.renderLeaderboard(
+        document.getElementById('leaderboard-list'),
+        ArcadeFeatures.recordScore('tetris', currentMode, score)
+      );
+    }
 
     function onModeChange() {
       currentMode = document.getElementById('game-mode').value;
@@ -533,27 +571,37 @@
       const diffLabel = document.getElementById('diff-label');
       const timerBadge = document.getElementById('blitz-timer');
 
-      if (currentMode === 'solo') {
+      const soloMode = currentMode === 'solo' || currentMode === 'sprint';
+      if (soloMode) {
         aiContainer.style.display = 'none';
         diffSelect.style.display = 'none';
         diffLabel.style.display = 'none';
-        timerBadge.style.display = 'none';
       } else {
         aiContainer.style.display = 'flex';
         diffSelect.style.display = 'inline-block';
         diffLabel.style.display = 'inline-block';
-        timerBadge.style.display = currentMode === 'blitz' ? 'inline-block' : 'none';
       }
+      timerBadge.style.display = currentMode === 'blitz' || currentMode === 'sprint' ? 'inline-block' : 'none';
+      timerBadge.textContent = currentMode === 'sprint' ? '用時：0s' : '剩餘時間：120s';
+      refreshLeaderboard();
     }
 
     function checkMatchEnd() {
-      if (currentMode === 'solo' && human.isOver) {
+      if ((currentMode === 'solo' || currentMode === 'sprint') && human.isOver) {
         isMatchRunning = false;
+        document.getElementById('game-mode').disabled = false;
+        recordMatchScore(human.score);
         human.draw();
-        human.drawOverlay('GAME OVER', `最終得分：${human.score}`, '#f38ba8');
+        const title = currentMode === 'sprint' ? 'SPRINT OVER' : 'GAME OVER';
+        const subtitle = currentMode === 'sprint'
+          ? `完成 ${human.lines}/40 行・得分：${human.score}`
+          : `最終得分：${human.score}`;
+        human.drawOverlay(title, subtitle, '#f38ba8');
         document.getElementById('start-btn').textContent = '重新開始';
       } else if (currentMode === 'battle' && (human.isOver || cpu.isOver)) {
         isMatchRunning = false;
+        document.getElementById('game-mode').disabled = false;
+        recordMatchScore(human.score);
         human.draw();
         cpu.draw();
         if (human.isOver) {
@@ -569,6 +617,8 @@
 
     function finishBlitzMatch() {
       isMatchRunning = false;
+      document.getElementById('game-mode').disabled = false;
+      recordMatchScore(human.score);
       human.isOver = true;
       cpu.isOver = true;
       human.draw();
@@ -585,6 +635,16 @@
         cpu.drawOverlay('平手 DRAW', `${cpu.score} 分`, '#f9e2af');
       }
       document.getElementById('start-btn').textContent = '重新挑戰';
+    }
+
+    function finishSprintMatch() {
+      isMatchRunning = false;
+      document.getElementById('game-mode').disabled = false;
+      human.isOver = true;
+      recordMatchScore(human.score);
+      human.draw();
+      human.drawOverlay('40 LINES!', `完成時間：${Math.floor(sprintAccumulator / 1000)}s`, '#a6e3a1');
+      document.getElementById('start-btn').textContent = '再衝一次';
     }
 
     function gameLoop(time = 0) {
@@ -607,6 +667,12 @@
         }
       }
 
+      if (currentMode === 'sprint') {
+        sprintAccumulator += deltaTime;
+        document.getElementById('blitz-timer').textContent =
+          `用時：${Math.floor(sprintAccumulator / 1000)}s`;
+      }
+
       // 更新玩家
       if (!human.isOver) {
         human.dropCounter += deltaTime;
@@ -622,7 +688,7 @@
       }
 
       // 更新電腦 AI（非單人模式時）
-      if (currentMode !== 'solo' && !cpu.isOver) {
+      if ((currentMode === 'battle' || currentMode === 'blitz') && !cpu.isOver) {
         cpu.dropCounter += deltaTime;
         cpu.timeSpeedCounter += deltaTime;
         if (cpu.timeSpeedCounter > 18000) {
@@ -636,13 +702,14 @@
         cpu.draw();
       }
 
-      animationId = requestAnimationFrame(gameLoop);
+      if (isMatchRunning) animationId = requestAnimationFrame(gameLoop);
     }
 
     function startGame() {
       if (animationId) cancelAnimationFrame(animationId);
 
       onModeChange();
+      document.getElementById('game-mode').disabled = true;
 
       // 設定 AI 反應速度
       const diff = document.getElementById('ai-difficulty').value;
@@ -652,10 +719,13 @@
 
       blitzTimeLeft = 120;
       blitzAccumulator = 0;
-      document.getElementById('blitz-timer').textContent = '剩餘時間：120s';
+      sprintAccumulator = 0;
+      matchRecorded = false;
+      document.getElementById('blitz-timer').textContent =
+        currentMode === 'sprint' ? '用時：0s' : '剩餘時間：120s';
 
       human.reset();
-      if (currentMode !== 'solo') {
+      if (currentMode === 'battle' || currentMode === 'blitz') {
         cpu.reset();
       }
 
@@ -693,5 +763,15 @@
     human.draw();
     cpu.draw();
 
-document.getElementById('game-mode').addEventListener('change', onModeChange);
-document.getElementById('start-btn').addEventListener('click', startGame);
+    document.getElementById('game-mode').addEventListener('change', onModeChange);
+    document.getElementById('start-btn').addEventListener('click', startGame);
+
+    ArcadeFeatures.bindSkin(document.getElementById('skin-select'), skin => {
+      skin.blocks.forEach((color, index) => {
+        if (index > 0) COLORS[index] = color;
+      });
+      human.draw();
+      cpu.draw();
+    });
+    ArcadeFeatures.bindSoundToggle(document.getElementById('sound-toggle'));
+    onModeChange();
