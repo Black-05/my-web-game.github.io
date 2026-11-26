@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <title>我的第一個 GitHub 網頁遊戲</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      background-color: #1e1e2e;
+      color: #ffffff;
+      margin: 0;
+      padding-top: 40px;
+    }
+    #game-area {
+      width: 400px;
+      height: 400px;
+      background-color: #2a2a40;
+      border: 3px solid #89b4fa;
+      margin: 20px auto;
+      position: relative;
+      overflow: hidden;
+      border-radius: 10px;
+    }
+    #target {
+      width: 50px;
+      height: 50px;
+      background-color: #f38ba8;
+      position: absolute;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: 0.1s;
+    }
+  </style>
+</head>
+<body>
+  <h1>反應力大挑戰</h1>
+  <p>分數：<span id="score">0</span> 分 | 剩餘時間：<span id="time">15</span> 秒</p>
+  <button onclick="startGame()" style="padding: 8px 16px; font-size: 16px; cursor: pointer;">開始遊戲</button>
+
+  <div id="game-area">
+    <div id="target" style="display: none;"></div>
+  </div>
+
+  <script>
+    let score = 0;
+    let timeLeft = 15;
+    let timer = null;
+    const target = document.getElementById('target');
+    const scoreDisplay = document.getElementById('score');
+    const timeDisplay = document.getElementById('time');
+
+    function moveTarget() {
+      const maxX = 400 - 50;
+      const maxY = 400 - 50;
+      target.style.left = Math.floor(Math.random() * maxX) + 'px';
+      target.style.top = Math.floor(Math.random() * maxY) + 'px';
+    }
+
+    target.addEventListener('click', () => {
+      if (timeLeft > 0) {
+        score++;
+        scoreDisplay.textContent = score;
+        moveTarget();
+      }
+    });
+
+    function startGame() {
+      score = 0;
+      timeLeft = 15;
+      scoreDisplay.textContent = score;
+      timeDisplay.textContent = timeLeft;
+      target.style.display = 'block';
+      moveTarget();
+
+      clearInterval(timer);
+      timer = setInterval(() => {
+        timeLeft--;
+        timeDisplay.textContent = timeLeft;
+        if (timeLeft <= 0) {
+          clearInterval(timer);
+          target.style.display = 'none';
+          alert('時間到！你的最終得分是：' + score + ' 分');
+        }
+      }, 1000);
+    }
+  </script>
+</body>
+</html>
