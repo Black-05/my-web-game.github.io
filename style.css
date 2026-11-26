@@ -168,3 +168,15 @@
 #ai-level {
   color: #f38ba8;
 }
+
+.game-home-link {
+  margin-bottom: 12px;
+  color: #a6adc8;
+  font-size: 14px;
+  text-decoration: none;
+}
+
+.game-home-link:hover,
+.game-home-link:focus-visible {
+  color: #89b4fa;
+}

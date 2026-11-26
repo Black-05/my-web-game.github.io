@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <title>俄羅斯方塊 TETRIS - 單人與電腦對決版</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <a class="game-home-link" href="index.html">← 回到小遊戲選單</a>
+  <h1>俄羅斯方塊 TETRIS</h1>
+
+  <div class="top-bar">
+    <label for="game-mode">遊戲模式：</label>
+    <select id="game-mode">
+      <option value="battle">⚔️ 電腦對決模式（消行互送干擾）</option>
+      <option value="solo">👤 單人經典無盡模式</option>
+      <option value="blitz">⏱️ 限時 2 分鐘高分競速（vs 電腦）</option>
+    </select>
+
+    <label for="ai-difficulty" id="diff-label">電腦難度：</label>
+    <select id="ai-difficulty">
+      <option value="easy">簡單（慢速）</option>
+      <option value="normal" selected>普通（均衡）</option>
+      <option value="hard">困難（高速）</option>
+    </select>
+
+    <div class="timer-badge" id="blitz-timer">剩餘時間：120s</div>
+
+    <button id="start-btn">開始遊戲</button>
+  </div>
+
+  <div class="arena">
+    <!-- 玩家區域 -->
+    <div class="player-zone">
+      <div>
+        <div class="zone-header human-title">玩家 (YOU)</div>
+        <canvas id="player-board" class="board" width="260" height="520"></canvas>
+      </div>
+      <div class="side-panel">
+        <div class="info-box">
+          <div class="info-title">下一個方塊</div>
+          <canvas id="player-next" class="next-box" width="100" height="100"></canvas>
+        </div>
+        <div class="info-box">
+          <div class="info-title">分數 SCORE</div>
+          <div class="info-value" id="player-score">0</div>
+        </div>
+        <div class="info-box">
+          <div class="info-title">消除行數</div>
+          <div class="info-value" id="player-lines">0</div>
+        </div>
+        <div class="info-box">
+          <div class="info-title">速度等級</div>
+          <div class="info-value" id="player-level">1</div>
+        </div>
+        <div class="info-box">
+          <div class="info-title">目前朝向</div>
+          <div class="info-value" id="player-dir">0° (上)</div>
+        </div>
+        <div class="garbage-alert" id="player-alert"></div>
+      </div>
+    </div>
+
+    <!-- 電腦對手區域 -->
+    <div class="player-zone ai-zone" id="ai-container">
+      <div>
+        <div class="zone-header ai-title">電腦對手 (CPU)</div>
+        <canvas id="ai-board" class="board" width="260" height="520"></canvas>
+      </div>
+      <div class="side-panel">
+        <div class="info-box">
+          <div class="info-title">電腦下一個</div>
+          <canvas id="ai-next" class="next-box" width="100" height="100"></canvas>
+        </div>
+        <div class="info-box">
+          <div class="info-title">電腦分數</div>
+          <div class="info-value" id="ai-score">0</div>
+        </div>
+        <div class="info-box">
+          <div class="info-title">電腦消行</div>
+          <div class="info-value" id="ai-lines">0</div>
+        </div>
+        <div class="info-box">
+          <div class="info-title">速度等級</div>
+          <div class="info-value" id="ai-level">1</div>
+        </div>
+        <div class="garbage-alert" id="ai-alert"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="controls">
+    操作說明：<kbd>←</kbd> <kbd>→</kbd> 左右移動 ｜ <kbd>↑</kbd> 向右順時針旋轉 90°（四方向循環） ｜ <kbd>↓</kbd> 加速下落 ｜ <kbd>空白鍵</kbd> 直接落底
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

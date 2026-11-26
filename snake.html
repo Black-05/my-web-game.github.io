@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#181825">
+  <title>貪食蛇 - 小遊戲樂園</title>
+  <link rel="stylesheet" href="arcade.css">
+</head>
+<body class="arcade-page">
+  <header class="arcade-header">
+    <a class="arcade-back" href="index.html">← 回到小遊戲選單</a>
+    <h1>🐍 貪食蛇</h1>
+    <p>吃下食物讓蛇變長，別撞到牆壁或自己的身體！</p>
+  </header>
+
+  <main class="arcade-panel">
+    <div class="arcade-stats" aria-live="polite">
+      <div class="arcade-stat">分數<strong id="score">0</strong></div>
+      <div class="arcade-stat">最高分<strong id="best-score">0</strong></div>
+    </div>
+    <canvas id="game" class="arcade-canvas" width="480" height="480" aria-label="貪食蛇遊戲畫面"></canvas>
+    <p class="game-message" id="message" aria-live="polite">按「開始遊戲」開始移動！</p>
+    <div class="arcade-actions">
+      <button class="arcade-button" id="start-button" type="button">開始遊戲</button>
+    </div>
+    <p class="arcade-help">方向鍵或 WASD 移動 · P 暫停 · 吃到食物得 10 分</p>
+  </main>
+
+  <script src="snake.js"></script>
+</body>
+</html>

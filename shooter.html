@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#181825">
+  <title>星際戰機 - 小遊戲樂園</title>
+  <link rel="stylesheet" href="arcade.css">
+</head>
+<body class="arcade-page">
+  <header class="arcade-header">
+    <a class="arcade-back" href="index.html">← 回到小遊戲選單</a>
+    <h1>🚀 星際戰機</h1>
+    <p>移動戰機並發射雷射，擊落敵機、閃避撞擊！</p>
+  </header>
+
+  <main class="arcade-panel">
+    <div class="arcade-stats" aria-live="polite">
+      <div class="arcade-stat">分數<strong id="score">0</strong></div>
+      <div class="arcade-stat">生命<strong id="lives">3</strong></div>
+      <div class="arcade-stat">最高分<strong id="best-score">0</strong></div>
+    </div>
+    <canvas id="game" class="arcade-canvas" width="480" height="600" aria-label="星際戰機遊戲畫面"></canvas>
+    <p class="game-message" id="message" aria-live="polite">按「開始遊戲」出擊！</p>
+    <div class="arcade-actions">
+      <button class="arcade-button" id="start-button" type="button">開始遊戲</button>
+    </div>
+    <p class="arcade-help">← → 或 A / D 移動 · 按住空白鍵連續射擊 · P 暫停</p>
+  </main>
+
+  <script src="shooter.js"></script>
+</body>
+</html>
